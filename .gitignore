@@ -15,3 +15,6 @@ Thumbs.db
 
 # Don't share raw backups
 *.sql.bak
+
+# SMTP credentials (keep local)
+config/mail.php

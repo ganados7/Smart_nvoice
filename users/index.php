@@ -21,12 +21,13 @@ $rows = $pdo->query('SELECT * FROM users ORDER BY user_id')->fetchAll();
 <div class="card">
     <div class="table-wrap">
         <table class="table" id="usersTable">
-            <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
+            <thead><tr><th>Username</th><th>Full Name</th><th>Gmail</th><th>Role</th><th>Status</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
             <tbody>
             <?php foreach ($rows as $r): ?>
                 <tr>
                     <td class="mono strong"><?= e($r['username']) ?></td>
                     <td><?= e($r['full_name']) ?></td>
+                    <td class="muted"><?= e($r['gmail'] ?? '—') ?></td>
                     <td><span class="badge badge-<?= $r['role'] === 'Admin' ? 'rose' : ($r['role'] === 'Accountant' ? 'sky' : 'amber') ?>"><?= e($r['role']) ?></span></td>
                     <td><?= status_badge($r['status']) ?></td>
                     <td class="muted"><?= format_date($r['created_at']) ?></td>

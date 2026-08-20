@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $username = trim($_POST['username'] ?? '');
     $fullName = trim($_POST['full_name'] ?? '');
+    $gmail = trim($_POST['gmail'] ?? '');
     $role = $_POST['role'] ?? 'Staff';
     $status = $_POST['status'] ?? 'Active';
     $password = trim($_POST['password'] ?? '');
@@ -18,14 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_flash('error', 'Username and full name are required.');
         redirect("users/edit.php?id=$id");
     }
+    if ($gmail !== '' && !filter_var($gmail, FILTER_VALIDATE_EMAIL)) {
+        set_flash('error', 'Please enter a valid Gmail address.');
+        redirect("users/edit.php?id=$id");
+    }
     try {
         if ($password !== '') {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $pdo->prepare('UPDATE users SET username=?, password=?, full_name=?, role=?, status=? WHERE user_id=?')
-                ->execute([$username, $hash, $fullName, $role, $status, $id]);
+            $pdo->prepare('UPDATE users SET username=?, password=?, full_name=?, gmail=?, role=?, status=? WHERE user_id=?')
+                ->execute([$username, $hash, $fullName, $gmail, $role, $status, $id]);
         } else {
-            $pdo->prepare('UPDATE users SET username=?, full_name=?, role=?, status=? WHERE user_id=?')
-                ->execute([$username, $fullName, $role, $status, $id]);
+            $pdo->prepare('UPDATE users SET username=?, full_name=?, gmail=?, role=?, status=? WHERE user_id=?')
+                ->execute([$username, $fullName, $gmail, $role, $status, $id]);
         }
         audit('UPDATE', 'users', "Updated user '$username'");
         set_flash('success', 'User updated successfully.');
@@ -52,6 +57,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="form-grid">
                 <div class="field"><label for="username">Username <span class="req">*</span></label><input class="input" id="username" name="username" value="<?= e($r['username']) ?>" required></div>
                 <div class="field"><label for="full_name">Full Name <span class="req">*</span></label><input class="input" id="full_name" name="full_name" value="<?= e($r['full_name']) ?>" required></div>
+                <div class="field"><label for="gmail">Gmail <span class="text-sm text-muted">(used for OTP codes)</span></label><input class="input" type="email" id="gmail" name="gmail" value="<?= e($r['gmail'] ?? '') ?>" placeholder="user@gmail.com"></div>
                 <div class="field"><label for="password">New Password <span class="text-sm text-muted">(leave blank to keep)</span></label><input class="input" type="password" id="password" name="password" autocomplete="new-password"></div>
                 <div class="field"><label for="role">Role</label>
                     <select class="select" id="role" name="role">

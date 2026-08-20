@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 if (current_user()) {
     redirect('dashboard/index.php');
@@ -22,16 +23,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password']) && $user['status'] === 'Active') {
             session_regenerate_id(true);
-            $_SESSION['user'] = [
-                'user_id'   => (int)$user['user_id'],
-                'username'  => $user['username'],
-                'full_name' => $user['full_name'],
-                'role'      => $user['role'],
+
+            $pending = [
+                'user_id'  => (int)$user['user_id'],
+                'username' => $user['username'],
+                'full_name'=> $user['full_name'],
+                'gmail'    => $user['gmail'] ?? '',
+                'role'     => $user['role'],
             ];
-            audit('LOGIN', 'auth', 'User logged in');
-            redirect('dashboard/index.php');
+
+            $gmail = trim((string)($user['gmail'] ?? ''));
+            $lastVerified = (int)($_SESSION['otp_verified_at'] ?? 0);
+            $cooldownOk = $lastVerified > 0 && (time() - $lastVerified) <= OTP_COOLDOWN_SECONDS;
+
+            /* If verified within the cooldown window, log straight in. */
+            if ($gmail === '' || $cooldownOk) {
+                $_SESSION['user'] = $pending;
+                if ($gmail === '') {
+                    set_flash('warning', 'No Gmail set for this account. Add one in Users so OTP security is enabled.');
+                }
+                audit('LOGIN', 'auth', 'User logged in');
+                redirect('dashboard/index.php');
+            }
+
+            /* Otherwise, send an OTP code and take them to verification. */
+            $_SESSION['pending_user'] = $pending;
+            $_SESSION['otp_expires']  = time() + OTP_EXPIRY_SECONDS;
+            $_SESSION['otp_last_sent'] = time();
+
+            $otpCode = create_login_otp($user);
+            $_SESSION['otp_display'] = $otpCode;
+            audit('OTP_SENT', 'auth', 'Login code generated');
+
+            set_flash('success', 'A 6-digit login code has been generated.');
+            redirect('auth/verify.php');
+        } else {
+            $error = 'Invalid username or password.';
         }
-        $error = 'Invalid username or password.';
     }
 }
 $company = settings();
@@ -79,6 +107,7 @@ $company = settings();
                     <input class="input" type="password" id="password" name="password" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Sign In <?= icon('login', '16') ?></button>
+                <p class="text-sm text-muted" style="margin-top:12px;text-align:center;">For security, a one-time code is sent to your Gmail when you sign in.</p>
             </form>
             <div class="auth-hint">Default account: <b>admin</b> / <b>admin123</b></div>
             <div class="auth-foot">© <?= date('Y') ?> <?= e($company['company_name']) ?></div>
