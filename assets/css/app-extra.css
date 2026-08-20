@@ -1,0 +1,48 @@
+/* ============================================================
+   SMART E-INVOICING — Auth Pages & Print
+   ============================================================ */
+.auth-wrap {
+    min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr;
+    background:
+        radial-gradient(1100px 600px at -10% 10%, rgba(59, 130, 246, .22), transparent 55%),
+        radial-gradient(900px 500px at 110% 100%, rgba(14, 165, 233, .18), transparent 55%),
+        var(--bg);
+}
+.auth-brand { display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden; }
+.auth-brand::before { content: ''; position: absolute; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(59, 130, 246, .16), transparent 65%); bottom: -140px; left: -120px; animation: blob 9s ease-in-out infinite alternate; }
+.auth-brand::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(37, 99, 235, .14), transparent 65%); top: -80px; right: -60px; animation: blob 11s ease-in-out infinite alternate-reverse; }
+@keyframes blob { from { transform: translate(0, 0) scale(1); } to { transform: translate(30px, -25px) scale(1.12); } }
+.auth-brand .big-logo { width: 74px; height: 74px; border-radius: 20px; background: var(--grad); display: grid; place-items: center; box-shadow: 0 14px 40px rgba(59, 130, 246, .5); margin-bottom: 26px; color: #fff; }
+.auth-brand h1 { font-size: 38px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; max-width: 480px; }
+.auth-brand h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.auth-brand p { color: var(--muted); max-width: 420px; margin-top: 16px; font-size: 14.5px; line-height: 1.7; }
+.auth-panel { display: grid; place-items: center; padding: 40px; }
+.auth-card { width: min(420px, 100%); background: rgba(17, 26, 46, .75); border: 1px solid var(--border-2); border-radius: 22px; padding: 38px 34px; backdrop-filter: blur(18px); box-shadow: 0 30px 80px rgba(2, 8, 23, .6); }
+.auth-card h2 { font-size: 22px; font-weight: 700; }
+.auth-card .sub { color: var(--muted); font-size: 13px; margin: 6px 0 26px; }
+.auth-foot { margin-top: 18px; font-size: 12px; color: var(--muted-2); text-align: center; }
+.auth-hint { margin-top: 14px; font-size: 12px; color: var(--muted); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; }
+
+@media (max-width: 900px) {
+    .auth-wrap { grid-template-columns: 1fr; }
+    .auth-brand { display: none; }
+}
+
+/* ============ PRINT (invoice / receipt / report) ============ */
+/* .print-area is visible on screen; on print, everything else is hidden */
+
+@media print {
+    body { background: #fff !important; }
+    .sidebar, .topbar, .page-head, .no-print { display: none !important; }
+    .content > *:not(.print-area) { display: none !important; }
+    .print-area { display: block !important; color: #111; background: #fff; padding: 20px; }
+    .content { padding: 0; }
+    .print-area .doc-title { color: #111; }
+    .print-area .doc-no .num { color: #111; }
+    .print-area .doc-total .grand .num { color: #111; }
+    .print-area .doc-total { background: #f1f5f9; border-color: #cbd5e1; }
+    .print-area .doc-meta .meta-box { background: #f8fafc; border-color: #e2e8f0; }
+    .print-area table.table { color: #111; border-color: #cbd5e1; }
+    .print-area .table thead th { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .print-area .table tbody td { border-color: #e2e8f0; color: #111; }
+}

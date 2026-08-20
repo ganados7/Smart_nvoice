@@ -1,0 +1,17 @@
+# Environments
+.env
+*.log
+
+# Composer / PHP
+/vendor/
+composer.phar
+
+# Scaffolding & tmp
+/tmp/
+/.idea/
+.vscode/
+*.sql~
+Thumbs.db
+
+# Don't share raw backups
+*.sql.bak
